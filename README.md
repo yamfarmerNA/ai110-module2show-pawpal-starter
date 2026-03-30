@@ -22,6 +22,31 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Testing PawPal+
+
+Run the full test suite with:
+
+```bash
+python -m pytest
+```
+
+The suite covers 16 tests across 7 areas:
+
+| Area | What it checks |
+|---|---|
+| Task completion | `mark_complete()` sets the flag; calling it twice is safe |
+| Task addition | `add_task()` correctly grows the pet's task list |
+| Edge cases | Pet with no tasks returns empty lists; scheduler produces an empty schedule |
+| Sorting | `sort_tasks_by_time()` returns tasks in chronological order; tasks with no preferred time sort last |
+| Filtering | `filter_tasks()` correctly isolates by pet name and by completion status |
+| Recurrence | Completing a DAILY task creates a new occurrence due tomorrow; WEEKLY tasks due in 7 days; ONCE tasks produce no new occurrence |
+| Conflict detection | Overlapping tasks produce a warning string; back-to-back tasks and scheduler output are conflict-free |
+
+**Confidence level: ★★★★☆**
+Core scheduling behaviors (sorting, filtering, recurrence, conflict detection) are verified end-to-end. The main untested area is the Streamlit UI layer and multi-week recurring reset logic, which would require integration or browser-level tests.
+
+---
+
 ## Getting started
 
 ### Setup
