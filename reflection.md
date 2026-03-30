@@ -5,7 +5,20 @@
 **a. Initial design**
 
 - Briefly describe your initial UML design.
+
+The data classes model the real-world entities in the app. Owner is the root — it holds a list of Pets and a list of TimeBlocks representing when the owner is free. Each Pet holds a list of Tasks and knows how to filter and sort them by priority. Task captures everything needed to describe a care activity: its duration, Priority (LOW/MEDIUM/HIGH), Frequency (ONCE/DAILY/WEEKLY), and an optional preferred time of day. TimeBlock represents a window of availability and can detect overlaps with other blocks.
+
+
 - What classes did you include, and what responsibilities did you assign to each?
+Data Classes
+TimeBlock
+Represents a window of time when the owner is available (e.g. 8:00–10:00 AM). Knows how long it is and whether it overlaps with another block. Used by Scheduler to find valid slots for tasks.
+
+Task
+A single pet care activity — a walk, feeding, medication, etc. Holds everything needed to describe and schedule it: how long it takes, how urgent it is (Priority), how often it repeats (Frequency), and a preferred time of day. Knows whether it's been done and whether it's overdue.
+
+Pet
+An animal owned by the owner. Holds a list of Tasks and can filter/sort them. Its main job is to be a container that groups tasks by animal, so the scheduler knows which pet each task belongs to.
 
 **b. Design changes**
 
@@ -23,8 +36,9 @@
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+The scheduler places tasks by scanning available TimeBlocks in a fixed 15-minute step (`cursor += timedelta(minutes=15)`) rather than jumping directly to the earliest free slot. This means it could waste up to 14 minutes of availability looking for a gap that is right at a non-aligned boundary, and it never considers reordering tasks to pack them more tightly.
+
+This tradeoff is reasonable for a pet-care scenario because the schedule is meant for a human to follow — clean, aligned time slots (8:00, 8:15, 8:30…) are easier to read and act on than mathematically optimal but awkward times like 8:07 AM. Simplicity in the output matters more than perfect utilization of every minute.
 
 ---
 
