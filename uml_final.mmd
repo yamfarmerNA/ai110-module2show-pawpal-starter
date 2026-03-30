@@ -1,0 +1,116 @@
+classDiagram
+    direction TB
+
+    class Priority {
+        <<enumeration>>
+        LOW = 1
+        MEDIUM = 2
+        HIGH = 3
+    }
+
+    class Frequency {
+        <<enumeration>>
+        ONCE
+        DAILY
+        WEEKLY
+    }
+
+    class Species {
+        <<enumeration>>
+        DOG
+        CAT
+        BIRD
+        OTHER
+    }
+
+    class TimeBlock {
+        +time start
+        +time end
+        +duration_mins() int
+        +overlaps(other TimeBlock) bool
+    }
+
+    class Task {
+        +int id
+        +str title
+        +int duration_mins
+        +Priority priority
+        +Frequency frequency
+        +time preferred_time
+        +bool is_completed
+        +date due_date
+        +mark_complete() None
+        +is_overdue(reference datetime) bool
+    }
+
+    class Pet {
+        +int id
+        +str name
+        +Species species
+        +int age
+        +list~Task~ tasks
+        +add_task(task Task) None
+        +get_pending_tasks() list~Task~
+        +get_tasks_by_priority() list~Task~
+    }
+
+    class Owner {
+        +int id
+        +str name
+        +list~TimeBlock~ available_times
+        +list~Pet~ pets
+        +add_pet(pet Pet) None
+        +get_pets() list~Pet~
+    }
+
+    class ScheduledTask {
+        +Task task
+        +Pet pet
+        +datetime scheduled_time
+        +str reason
+        +end_time() datetime
+    }
+
+    class Schedule {
+        +date date
+        +Owner owner
+        +list~ScheduledTask~ scheduled_tasks
+        +list~str~ explanations
+        +add_scheduled_task(st ScheduledTask) None
+        +get_tasks_by_time() list~ScheduledTask~
+        +detect_conflicts() list~str~
+        +to_summary() str
+    }
+
+    class Scheduler {
+        +Owner owner
+        +generate_schedule(target_date date) Schedule
+        +check_conflicts(task Task, start datetime, schedule Schedule) bool
+        +get_upcoming_tasks() list
+        +generate_recurring_tasks() None
+        +sort_tasks_by_time(tasks list) list~Task~
+        +filter_tasks(pet_name str, completed bool) list
+        +complete_task(pet Pet, task Task) Task
+    }
+
+    %% Ownership / composition
+    Owner "1" *-- "0..*" Pet         : owns
+    Owner "1" *-- "0..*" TimeBlock   : available_times
+
+    %% Pet holds tasks
+    Pet   "1" *-- "0..*" Task        : tasks
+
+    %% Enum associations
+    Task  -->  Priority  : priority
+    Task  -->  Frequency : frequency
+    Pet   -->  Species   : species
+
+    %% Schedule and its parts
+    Schedule  "1" *-- "0..*" ScheduledTask : scheduled_tasks
+    Schedule  -->  Owner                   : owner
+    ScheduledTask --> Task                 : wraps
+    ScheduledTask --> Pet                  : for pet
+
+    %% Scheduler orchestrates everything
+    Scheduler --> Owner    : manages
+    Scheduler ..> Schedule : creates
